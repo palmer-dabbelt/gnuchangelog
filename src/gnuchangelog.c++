@@ -18,9 +18,10 @@
  * along with gnuchangelog.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
 #include <libgit2++/repository.h++>
 #include <libgit2++/diff.h++>
+#include <stdlib.h>
+#include <sstream>
 
 int main(int argc, const char **argv)
 {
@@ -57,12 +58,17 @@ int main(int argc, const char **argv)
             << ">"
             << "\n\n";
         auto diff = libgit2xx::diff(commit, parent);
-        auto message = commit.message();
+        auto message = [&]() {
+            std::stringstream ss(commit.message());
+            std::string cut;
+            std::getline(ss, cut, '\n');
+            return cut;
+        }();
         diff.foreach_file(
             [&](const auto& file)
             {
-                std::cout << "\t* " << file << ": " << message << "";
-                message = "Likewise.\n";
+                std::cout << "\t* " << file << ": " << message << "\n";
+                message = "Likewise.";
             }
         );
 
