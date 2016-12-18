@@ -1,0 +1,13 @@
+LANGUAGES   += c++
+COMPILEOPTS += -std=c++14
+COMPILEOPTS += -Wall
+COMPILEOPTS += -Wextra
+COMPILEOPTS += -Werror
+COMPILEOPTS += -Isrc
+
+LANGUAGES   += c++
+COMPILEOPTS += `ppkg-config libgit2 --cflags`
+LINKOPTS    += `ppkg-config libgit2 --libs`
+
+BINARIES    += gnuchangelog
+SOURCES     += gnuchangelog.c++
