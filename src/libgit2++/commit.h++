@@ -84,6 +84,11 @@ namespace libgit2xx {
             return signature(git_commit_committer(c));
         }
 
+        const signature author(void) const
+        {
+            return signature(git_commit_author(c));
+        }
+
         const git_oid *id(void) const
         {
             return git_commit_id(c);

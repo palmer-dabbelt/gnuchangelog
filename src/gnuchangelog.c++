@@ -52,9 +52,9 @@ int main(int argc, const char **argv)
         std::cout 
             << yyyy_mm_dd(commit.time())
             << " "
-            << commit.committer().name
+            << commit.author().name
             << " <"
-            << commit.committer().email
+            << commit.author().email
             << ">"
             << "\n\n";
         auto diff = libgit2xx::diff(commit, parent);
