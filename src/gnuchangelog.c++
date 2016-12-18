@@ -22,7 +22,7 @@
 #include <libgit2++/repository.h++>
 #include <libgit2++/diff.h++>
 
-int main(int argc, const char **argv __attribute__((unused)))
+int main(int argc, const char **argv)
 {
     static auto yyyy_mm_dd = [](const auto& time) {
         char buf[32];
@@ -30,12 +30,20 @@ int main(int argc, const char **argv __attribute__((unused)))
         return std::string(buf);
     };
 
-	if (argc != 1) abort();
+    if (argc != 2) {
+        std::cerr << argv[0] << " <parent>: Prints GNU-style ChangeLogs from git\n";
+        std::cerr << "  parent: The commit to stop at\n";
+        return 1;
+    }
 
 	auto repo = libgit2xx::repository(".");
+
+    auto stop_at_object = repo.revparse_single(argv[1]);
+    auto stop_at = stop_at_object.commit_lookup();
+
 	auto commit_object = repo.revparse_single("HEAD");
     auto commit = commit_object.commit_lookup();
-    while (true) {
+    while (stop_at.id() != commit.id()) {
         if (commit.has_parent() == false)
             return 0;
         auto parent = commit.parent();
