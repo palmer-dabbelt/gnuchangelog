@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 20156 Palmer Dabbelt
+ * Copyright (C) 2016 Palmer Dabbelt
  *   <palmer@dabbelt.com>
  *
  * This file is part of gnuchangelog.
