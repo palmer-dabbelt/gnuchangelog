@@ -48,7 +48,7 @@ namespace libgit2xx {
     public:
         commit commit_lookup(void)
         {
-            commit out;
+            commit out(repo);
             auto error = git_commit_lookup(out.ptrptr(), repo, git_object_id(obj));
             if (error != 0) {
                 const git_error *e = giterr_last();

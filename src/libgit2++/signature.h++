@@ -18,38 +18,34 @@
  * along with gnuchangelog.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBGIT2XX__TIME_HXX
-#define LIBGIT2XX__TIME_HXX
+#ifndef LIBGIT2XX__SIGNATURE_HXX
+#define LIBGIT2XX__SIGNATURE_HXX
 
-#include <git2.h>
+#include "time.h++"
+#include <string>
 
 namespace libgit2xx {
-	class time
-    {
-    private:
-        git_time_t t;
+	class signature {
+    public:
+        const std::string name;
+        const std::string email;
+        const time when;
 
     public:
-        time(const git_time_t& _t)
-        : t(_t)
+        signature(
+            const std::string& _name,
+            const std::string& _email,
+            const time& _when
+        ) : name(_name),
+            email(_email),
+            when(_when)
         {}
 
-        time(const git_time& _t)
-        : t(_t.time)
+        signature(const git_signature *sig)
+        : name(sig->name),
+          email(sig->email),
+          when(sig->when)
         {}
-
-    public:
-        time_t as_time_t(void) const
-        {
-            /* FIXME: Is this actually right? */
-            return (time_t)t;
-        }
-
-        time_t *as_time_t_ptr(void) const
-        {
-            /* FIXME: Is this actually right? */
-            return (time_t *)&t;
-        }
     };
 }
 

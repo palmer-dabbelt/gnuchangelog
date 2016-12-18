@@ -20,6 +20,7 @@
 
 #include <stdlib.h>
 #include <libgit2++/repository.h++>
+#include <libgit2++/diff.h++>
 
 int main(int argc, const char **argv __attribute__((unused)))
 {
@@ -35,11 +36,29 @@ int main(int argc, const char **argv __attribute__((unused)))
 	auto commit_object = repo.revparse_single("HEAD");
     auto commit = commit_object.commit_lookup();
     while (true) {
-
-        std::cout << yyyy_mm_dd(commit.time()) << "\n";
-
         if (commit.has_parent() == false)
             return 0;
+        auto parent = commit.parent();
+
+        std::cout 
+            << yyyy_mm_dd(commit.time())
+            << " "
+            << commit.committer().name
+            << " <"
+            << commit.committer().email
+            << ">"
+            << "\n\n";
+        auto diff = libgit2xx::diff(commit, parent);
+        auto message = commit.message();
+        diff.foreach_file(
+            [&](const auto& file)
+            {
+                std::cout << "\t* " << file << ": " << message << "";
+                message = "Likewise.\n";
+            }
+        );
+
+        std::cout << "\n";
 
         commit = commit.parent();
     }

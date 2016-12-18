@@ -26,21 +26,26 @@ namespace libgit2xx {
 }
 
 #include "time.h++"
+#include "signature.h++"
 #include <git2.h>
 #include <iostream>
 
 namespace libgit2xx {
 	class commit {
         friend class object;
+        friend class diff;
 
     private:
+        git_repository *repo;
         git_commit *c;
 
     protected:
-        commit(void)
-        : c(nullptr)
+        commit(git_repository *_repo)
+        : repo(_repo),
+          c(nullptr)
         {}
 
+        git_commit *ptr(void) const { return c; }
         git_commit **ptrptr(void) { return &c; }
 
     public:
@@ -52,14 +57,14 @@ namespace libgit2xx {
 
         bool has_parent(void) const
         {
-            commit parent;
+            commit parent(repo);
             auto error = git_commit_parent(parent.ptrptr(), c, 0);
             return error == 0;
         }
 
         commit parent(void) const
         {
-            commit parent;
+            commit parent(repo);
             auto error = git_commit_parent(parent.ptrptr(), c, 0);
             if (error != 0) {
                 const git_error *e = giterr_last();
@@ -67,6 +72,16 @@ namespace libgit2xx {
                 abort();
             }
             return parent;
+        }
+
+        const std::string message(void) const
+        {
+            return git_commit_message(c);
+        }
+
+        const signature committer(void) const
+        {
+            return signature(git_commit_committer(c));
         }
     };
 }
