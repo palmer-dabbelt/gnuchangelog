@@ -18,7 +18,7 @@
  * along with gnuchangelog.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LBIGIT2XX__COMMIT_HXX
+#ifndef LIBGIT2XX__COMMIT_HXX
 #define LIBGIT2XX__COMMIT_HXX
 
 namespace libgit2xx {
