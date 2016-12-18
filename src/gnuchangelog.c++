@@ -62,7 +62,7 @@ int main(int argc, const char **argv)
             std::stringstream ss(commit.message());
             std::string cut;
             std::getline(ss, cut, '\n');
-            return cut;
+            return cut + ".";
         }();
         diff.foreach_file(
             [&](const auto& file)
