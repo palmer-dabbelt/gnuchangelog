@@ -23,6 +23,13 @@
 #include <stdlib.h>
 #include <sstream>
 
+static auto first_line = [](const auto& str) {
+   std::stringstream ss(str);
+   std::string cut;
+   std::getline(ss, cut, '\n');
+   return cut;
+};
+
 int main(int argc, const char **argv)
 {
     static auto yyyy_mm_dd = [](const auto& time) {
@@ -49,6 +56,8 @@ int main(int argc, const char **argv)
             return 0;
         auto parent = commit.parent();
 
+        auto diff = libgit2xx::diff(commit, parent);
+
         std::cout 
             << yyyy_mm_dd(commit.time())
             << " "
@@ -57,18 +66,53 @@ int main(int argc, const char **argv)
             << commit.author().email
             << ">"
             << "\n\n";
-        auto diff = libgit2xx::diff(commit, parent);
-        auto message = [&]() {
-            std::stringstream ss(commit.message());
-            std::string cut;
-            std::getline(ss, cut, '\n');
-            return cut + ".";
-        }();
-        diff.foreach_file(
-            [&](const auto& file)
+
+        diff.foreach_hunk(
+            [&](const auto& file, const auto& header)
             {
-                std::cout << "\t* " << file << ": " << message << "\n";
-                message = "Likewise.";
+                auto floh = first_line(header);
+
+                if (floh.find_last_of("@") == std::string::npos || floh.find_last_of("@") + 2 >= floh.size()) {
+                    std::cout
+                        << "\t* "
+                        << file
+                        << " ("
+                        << "UNKNOWN"
+                        << "): "
+                        << first_line(commit.message())
+                        << "\n";
+                    return;
+                }
+                auto without_ats = floh.substr(floh.find_last_of("@") + 2);
+
+                if (without_ats.find_first_of("(") == std::string::npos) {
+                    std::cout
+                        << "\t* "
+                        << file
+                        << " ("
+                        << "UNKNOWN"
+                        << "): "
+                        << first_line(commit.message())
+                        << "\n";
+                    return;
+                }
+                auto without_args = without_ats.substr(0, without_ats.find_first_of("("));
+
+                auto function = 
+                    without_args.find_last_of(" ") == std::string::npos
+                    ? without_args
+                    : without_args.substr(without_args.find_last_of(" ") + 1);
+
+                std::cout
+                    << "\t* "
+                    << file
+                    << " ("
+                    << function
+                    << "): "
+                    << first_line(commit.message())
+                    << "\n";
+                return;
+
             }
         );
 

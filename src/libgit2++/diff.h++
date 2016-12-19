@@ -53,7 +53,7 @@ namespace libgit2xx {
         }
 
     private:
-        std::function<void(const std::string& filename)> foreach_file_function;
+        std::function<void(const std::string& f)> foreach_file_function;
         static int foreach_file_helper(
             const git_diff_delta *delta,
             float progress __attribute__((unused)),
@@ -61,12 +61,37 @@ namespace libgit2xx {
         )
         {
             auto d = (diff *)payload;
+
             auto old_path = delta->old_file.path;
             auto new_path = delta->new_file.path;
             assert(std::strcmp(old_path, new_path) == 0);
+
             d->foreach_file_function(new_path);
+
             return 0;
         }
+
+        std::function<void(const std::string& f, const std::string& h)> foreach_hunk_function;
+        static int foreach_hunk_helper(
+            const git_diff_delta *delta,
+            const git_diff_hunk *hunk,
+            void *payload
+        )
+        {
+            auto d = (diff *)payload;
+
+            auto old_path = delta->old_file.path;
+            auto new_path = delta->new_file.path;
+            assert(std::strcmp(old_path, new_path) == 0);
+
+            auto header = hunk->header;
+
+            d->foreach_hunk_function(new_path, header);
+
+            return 0;
+        }
+
+//        std::function<void(const std::string& l)> foreach_line_function;
 
     public:
         void foreach_file(std::function<void(const std::string& filename)> f)
@@ -80,7 +105,19 @@ namespace libgit2xx {
                 nullptr,
                 this
             );
-            
+        }
+
+        void foreach_hunk(std::function<void(const std::string&, const std::string&)> f)
+        {
+            foreach_hunk_function = f;
+            git_diff_foreach(
+                d,
+                nullptr,
+                nullptr,
+                foreach_hunk_helper,
+                nullptr,
+                this
+            );
         }
     };
 }
